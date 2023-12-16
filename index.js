@@ -28,6 +28,15 @@ app.get('/api/persons', (request, response) => {
     response.json(persons)
   })
 
+app.get('/api/info', async (request, response) => {
+    const currentDate = new Date().toUTCString();
+    response.set('Date', currentDate); 
+    response.send(
+        `<p>Phone book has info for ${persons.length} people</p>` +
+        `<p>Current Date: ${currentDate}</p>`
+    );
+});
+
 const PORT = 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
