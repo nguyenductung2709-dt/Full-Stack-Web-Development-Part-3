@@ -2,6 +2,8 @@ const express = require('express')
 const app = express()
 var morgan = require('morgan')
 const cors = require('cors')
+require('dotenv').config()
+const Person = require('./models/person')
 
 app.use(cors())
 app.use(express.static('dist'))
@@ -46,8 +48,14 @@ let persons = [
 ]
 
 app.get('/api/persons', (request, response) => {
-    response.json(persons)
-  })
+  Person.find({}) .then(persons => {
+      response.json(persons);
+    })
+    .catch(error => {
+      response.status(500).json({ error: error.message });
+    });
+});
+
 
 app.get('/api/info', async (request, response) => {
     const currentDate = new Date().toUTCString();
