@@ -67,54 +67,45 @@ app.get('/api/info', async (request, response) => {
 });
 
 app.get('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    const person = persons.find(person => person.id === id)
-  
-    if (person) {
-      response.json(person)
-    } else {
-      response.status(404).end()
-    }
-  
+  Person.findById(request.params.id).then(person => {
+    response.json(person)
   })
+})
 
 app.delete('/api/persons/:id', (request, response) => {
   const id = Number(request.params.id)
-  persons = persons.filter(person => person.id !== id)
-
+  Person = Person.filter(person => person.id !== id)
   response.status(204).end()
 })
 
 app.post('/api/persons', (request, response) => {
-    const body = request.body  
-    if (!body.name) {
-      return response.status(400).json({ 
-        error: 'name is missing' 
+  const body = request.body;
+
+  if (!body.name || !body.number) {
+      return response.status(400).json({ error: 'Name or number is missing' });
+  }
+
+  Person.findOne({ name: body.name })
+      .then((person) => {
+          if (person) {
+              return response.status(400).json({ error: 'Name must be unique' });
+          }
+
+          const newPerson = new Person({
+              name: body.name,
+              number: body.number,
+          });
+
+          return newPerson.save();
       })
-    }
+      .then((savedPerson) => {
+          response.json(savedPerson);
+      })
+      .catch((error) => {
+          response.status(500).json({ error: error.message });
+      });
+});
 
-    else if (!body.number) {
-        return response.status(400).json({ 
-          error: 'number is missing' 
-        })
-      }
-
-    else if (persons.map(person => person.name).includes(body.name)) {
-        return response.status(400).json({ 
-            error: 'name must be unique' 
-          })
-    }
-  
-    const person = {
-      id: Math.floor(Math.random() * (1000 - 3 + 1)) + 3,
-      name: body.name,
-      number: body.number,
-    }
-  
-    persons = persons.concat(person)
-  
-    response.json(person)
-  })
 
   const PORT = process.env.PORT || 3000
   app.listen(PORT, () => {
