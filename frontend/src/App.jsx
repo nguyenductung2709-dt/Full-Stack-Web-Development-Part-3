@@ -86,7 +86,7 @@ const App = () => {
   const deletePerson = (name, id) => {
     const confirmed = window.confirm(`Delete ${name} ?`);
     if (confirmed){
-    const url = `http://localhost:3001/persons/${id}`
+    const url = `http://localhost:3000/api/persons/${id}`
     personsService.eliminate(url).then(() => {
       const updatedPersons = persons.filter((person) => person.id !== id);
       setPersons(updatedPersons);
