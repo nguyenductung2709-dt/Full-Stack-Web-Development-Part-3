@@ -58,13 +58,19 @@ app.get('/api/persons', (request, response) => {
 
 
 app.get('/api/info', async (request, response) => {
-    const currentDate = new Date().toUTCString();
-    response.set('Date', currentDate); 
-    response.send(
-        `<p>Phone book has info for ${persons.length} people</p>` +
+  Person.find({})
+    .then(persons => {
+      const number = persons.length; 
+      const currentDate = new Date().toUTCString();
+      response.set('Date', currentDate);
+      response.send(
+        `<p>Phone book has info for ${number} people</p>` +
         `<p>Current Date: ${currentDate}</p>`
-    );
+      );
+    })
+    .catch(error => next(error))
 });
+
 
 app.get('/api/persons/:id', (request, response) => {
   Person.findById(request.params.id)
