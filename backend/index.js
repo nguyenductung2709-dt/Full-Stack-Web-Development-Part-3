@@ -67,9 +67,11 @@ app.get('/api/info', async (request, response) => {
 });
 
 app.get('/api/persons/:id', (request, response) => {
-  Person.findById(request.params.id).then(person => {
+  Person.findById(request.params.id)
+  .then(person => {
     response.json(person)
   })
+    .catch(error => next(error))
 })
 
 app.delete('/api/persons/:id', (request, response) => {
@@ -103,13 +105,37 @@ app.post('/api/persons', (request, response) => {
       .then((savedPerson) => {
           response.json(savedPerson);
       })
-      .catch((error) => {
-          response.status(500).json({ error: error.message });
-      });
+      .catch(error => next(error))
 });
 
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: 'unknown endpoint' })
+}
 
-  const PORT = process.env.PORT || 3000
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`)
-  })
+app.use(unknownEndpoint)
+
+const errorHandler = (error, request, response, next) => {
+  console.error(error);
+
+  let statusCode = error.status || 500;
+  let errorMessage = error.message || 'Internal Server Error';
+
+  if (error.name === 'CastError') {
+    statusCode = 400;
+    errorMessage = 'Malformatted ID';
+  } else if (error.name === 'ValidationError') {
+    statusCode = 400;
+    errorMessage = error.message;
+  }
+
+  response.status(statusCode).json({ error: errorMessage });
+};
+
+app.use(errorHandler);
+
+
+
+const PORT = process.env.PORT || 3000
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`)
+})
