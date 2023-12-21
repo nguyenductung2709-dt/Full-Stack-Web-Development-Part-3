@@ -62,25 +62,30 @@ const App = () => {
       }
     }
     else {
-    const noteObject = {
-      name: newName,
-      number: newNumber,
-      id: persons.length + 1,
+      const noteObject = {
+        name: newName,
+        number: newNumber,
+        id: persons.length + 1,
+      };
+      personsService
+        .create(noteObject)
+        .then((returnedPersons) => {
+          setPersons(persons.concat(returnedPersons));
+          setNewName('');
+          setNewNumber('');
+          setAddedMessage(`Added ${noteObject.name}`);
+          setTimeout(() => {
+            setAddedMessage(null);
+          }, 2000);
+        })
+        .catch((error) => {
+          const errorMessage = error.response.data.error;
+          setErrorMessage(errorMessage);
+          setTimeout(() => {
+            setErrorMessage(null);
+          }, 2000);
+        });
     }
-    personsService
-    .create(noteObject)
-    .then(returnedPersons => {
-      setPersons(persons.concat(returnedPersons))
-      setNewName('')
-      setNewNumber('')
-      setAddedMessage(
-        `Added ${noteObject.name}`
-      )
-      setTimeout(() => {
-        setAddedMessage(null)
-      }, 2000)
-    })
-  }
   }
 
   const deletePerson = (name, id) => {

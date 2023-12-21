@@ -88,31 +88,32 @@ app.delete('/api/persons/:id', (request, response) => {
     .catch(error => next(error))
 })
 
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
   const body = request.body;
 
   if (!body.name || !body.number) {
-      return response.status(400).json({ error: 'Name or number is missing' });
+    return response.status(400).json({ error: 'Name or number is missing' });
   }
 
   Person.findOne({ name: body.name })
-      .then((person) => {
-          if (person) {
-              return response.status(400).json({ error: 'Name must be unique' });
-          }
+    .then((person) => {
+      if (person) {
+        return response.status(400).json({ error: 'Name must be unique' });
+      }
 
-          const newPerson = new Person({
-              name: body.name,
-              number: body.number,
-          });
+      const newPerson = new Person({
+        name: body.name,
+        number: body.number,
+      });
 
-          return newPerson.save();
-      })
-      .then((savedPerson) => {
-          response.json(savedPerson);
-      })
-      .catch(error => next(error))
+      return newPerson.save();
+    })
+    .then((savedPerson) => {
+      response.json(savedPerson);
+    })
+    .catch(error => next(error)); 
 });
+
 
 app.put('/api/persons/:id', (request, response, next) => {
   const body = request.body
@@ -136,25 +137,17 @@ const unknownEndpoint = (request, response) => {
 app.use(unknownEndpoint)
 
 const errorHandler = (error, request, response, next) => {
-  console.error(error);
-
-  let statusCode = error.status || 500;
-  let errorMessage = error.message || 'Internal Server Error';
+  /*console.error(error.message)*/
 
   if (error.name === 'CastError') {
-    statusCode = 400;
-    errorMessage = 'Malformatted ID';
+    return response.status(400).send({ error: 'malformatted id' })
   } else if (error.name === 'ValidationError') {
-    statusCode = 400;
-    errorMessage = error.message;
+    return response.status(400).json({ error: error.message })
   }
 
-  response.status(statusCode).json({ error: errorMessage });
-};
-
+  next(error)
+}
 app.use(errorHandler);
-
-
 
 const PORT = process.env.PORT || 3000
 app.listen(PORT, () => {
