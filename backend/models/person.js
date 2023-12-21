@@ -27,7 +27,7 @@ const personSchema = new mongoose.Schema({
     required: [true, 'User phone number required'],
     validate: {
       validator: function (v) {
-        return /^\d{2,3}-\d{7,}$/.test(v);
+        return /^\d{2,3}-\d{7,}$/.test(v)
       },
       message: 'Please enter a valid phone number in the format XX-XXXXXXXX.',
     },
@@ -55,12 +55,12 @@ personSchema.set('toJSON', {
 else if (process.argv.length === 5) {
     const newName = process.argv[3];
     const newNumber = process.argv[4];
-  
+
     const person = new Person({
       name: newName,
       number: newNumber,
     });
-  
+
     person.save().then(() => {
       console.log(`added ${newName} number ${newNumber} to phonebook`);
       mongoose.connection.close();
